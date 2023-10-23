@@ -21,6 +21,20 @@ pub enum WarriorPositionState {
     Walking,
     Jumping,
     Crouching,
+    Fallen,
+}
+
+impl WarriorPositionState {
+    fn get_sprite_indexes(&self) -> Vec<usize> {
+        // todo: put this fn in another place
+        match self {
+            WarriorPositionState::Idle => vec![0, 1],
+            WarriorPositionState::Walking => vec![0, 1],
+            WarriorPositionState::Jumping => vec![3],
+            WarriorPositionState::Crouching => vec![2],
+            WarriorPositionState::Fallen => vec![4],
+        }
+    }
 }
 
 #[derive(Debug, Component, Clone, Default, Reflect, PartialEq, Eq)]
@@ -41,25 +55,39 @@ pub enum WarriorKind {
 }
 
 impl WarriorKind {
-    fn get_idle_sprite(
+    fn increment_sprite_idx(
         &self,
-        warrior_assets: &WarriorAssets,
-        idx: Option<usize>,
-    ) -> (Handle<Image>, usize) {
-        let sprites = match self {
-            WarriorKind::Jotaile => &warrior_assets.jotaile_sprites,
-        };
-        let idle_names: Vec<&String> = sprites.keys().filter(|&key| key.contains("idle")).collect();
-        let sprites_amount = idle_names.len();
-        let sprite_idx = idx.unwrap_or(0) % sprites_amount;
+        warrior_position_state: &WarriorPositionState,
+        texture_atlas: &mut TextureAtlasSprite,
+    ) {
+        let sprites_idx = warrior_position_state.get_sprite_indexes();
+        let sprites_amount = sprites_idx.len();
+        let min_index = sprites_idx[0];
+        dbg!(&texture_atlas.index);
 
-        (sprites[idle_names[sprite_idx]].clone(), sprites_amount)
+        if sprites_amount == 1 {
+            texture_atlas.index = min_index;
+            return;
+        }
+
+        let current_atlas_idx = texture_atlas.index;
+        let max_index = sprites_idx[1];
+
+        if current_atlas_idx < min_index || current_atlas_idx > max_index {
+            texture_atlas.index = min_index;
+            return;
+        }
+
+        texture_atlas.index = min_index + (current_atlas_idx + 1) % sprites_amount;
     }
 }
 
 #[derive(Debug, Component, Reflect, Default)]
 #[reflect(Component)]
-pub struct Speed(pub f32);
+pub struct Speed {
+    pub walk: f32,
+    pub jump: f32,
+}
 
 #[derive(Debug, Component, Reflect, Default)]
 #[reflect(Component)]
@@ -69,8 +97,6 @@ pub struct Warrior;
 #[reflect(Component)]
 pub struct SpriteAnimationTimer {
     pub timer: Timer,
-    pub frame: usize,
-    pub frames_amount: usize,
 }
 
 #[derive(Debug, Component, Reflect, Default)]
@@ -81,23 +107,26 @@ pub struct WarriorJumpingTimer {
 
 fn spawn_warrior(mut commands: Commands, warrior_assets: Res<WarriorAssets>) {
     let selected_warrior = WarriorKind::Jotaile;
-    let (image_handle, frames_amount): (Handle<Image>, usize) =
-        selected_warrior.get_idle_sprite(&warrior_assets, Some(0));
+    let default_position_state = WarriorPositionState::default();
 
     commands.spawn((
         Name::new("Jotaile"),
         selected_warrior.clone(),
         Player,
         Warrior,
-        WarriorPositionState::default(),
-        Speed(4.),
+        default_position_state,
+        Speed {
+            walk: 180.,
+            jump: 400.,
+        },
         FacingPosition::default(),
-        SpriteBundle {
-            sprite: Sprite {
+        SpriteSheetBundle {
+            sprite: TextureAtlasSprite {
+                index: 0,
                 custom_size: Some(WARRIOR_IN_GAME_SPRITE_SIZE),
                 ..default()
             },
-            texture: image_handle,
+            texture_atlas: warrior_assets.jotaile_sprites.clone(),
             transform: Transform::from_xyz(
                 -WINDOW_WIDTH / 3.,
                 -HALF_WINDOW_HEIGHT + FLOOR_HEIGHT + WARRIOR_IN_GAME_SPRITE_SIZE.y / 2.,
@@ -107,8 +136,6 @@ fn spawn_warrior(mut commands: Commands, warrior_assets: Res<WarriorAssets>) {
         },
         SpriteAnimationTimer {
             timer: Timer::from_seconds(0.75, TimerMode::Repeating),
-            frame: 0,
-            frames_amount: frames_amount,
         },
         Collider::cuboid(
             WARRIOR_IN_GAME_SPRITE_SIZE.x / 2.,
@@ -120,22 +147,34 @@ fn spawn_warrior(mut commands: Commands, warrior_assets: Res<WarriorAssets>) {
 
 fn update_warriors_sprites(
     mut animated_sprites: Query<
-        (&mut SpriteAnimationTimer, &WarriorKind, &mut Handle<Image>),
+        (
+            &mut SpriteAnimationTimer,
+            &WarriorKind,
+            &WarriorPositionState,
+            &mut TextureAtlasSprite,
+            Changed<WarriorPositionState>,
+        ),
         &Warrior,
     >,
-    warrior_assets: Res<WarriorAssets>,
     time: Res<Time>,
 ) {
-    for (mut sprite_animation_timer, warrior_kind, mut sprite) in &mut animated_sprites {
+    for (
+        //
+        mut sprite_animation_timer,
+        warrior_kind,
+        position_state,
+        mut sprite,
+        changed_position_state,
+    ) in &mut animated_sprites
+    {
+        if changed_position_state {
+            sprite_animation_timer.timer.reset();
+        }
+
         sprite_animation_timer.timer.tick(time.delta());
 
-        if sprite_animation_timer.timer.just_finished() {
-            let current_frame_idx = sprite_animation_timer.frame;
-            let (image_handle, frames_amount) =
-                warrior_kind.get_idle_sprite(&warrior_assets, Some(current_frame_idx + 1));
-            sprite_animation_timer.frame = (current_frame_idx + 1) % frames_amount;
-
-            *sprite = image_handle;
+        if changed_position_state || sprite_animation_timer.timer.just_finished() {
+            warrior_kind.increment_sprite_idx(position_state, &mut sprite);
         }
     }
 }

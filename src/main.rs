@@ -11,7 +11,7 @@ mod warrior;
 const WINDOW_HEIGHT: f32 = 540.0;
 const WINDOW_WIDTH: f32 = 960.0;
 const HALF_WINDOW_HEIGHT: f32 = WINDOW_HEIGHT / 2.;
-const HALF_WINDOW_WIDTH: f32 = -WINDOW_WIDTH / 2.;
+// const HALF_WINDOW_WIDTH: f32 = -WINDOW_WIDTH / 2.;
 
 fn main() {
     App::new()
