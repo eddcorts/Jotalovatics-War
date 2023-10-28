@@ -1,9 +1,10 @@
-use crate::assets::{WarriorAssets, WARRIOR_IN_GAME_SPRITE_SIZE};
+use crate::assets::{IncrementSpriteIndex, WarriorAssets, WARRIOR_IN_GAME_SPRITE_SIZE};
 use crate::player::Player;
 use crate::scenery::FLOOR_HEIGHT;
 use crate::{HALF_WINDOW_HEIGHT, WINDOW_WIDTH};
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
+
 pub struct WarriorPlugin;
 
 impl Plugin for WarriorPlugin {
@@ -24,19 +25,6 @@ pub enum WarriorPositionState {
     Fallen,
 }
 
-impl WarriorPositionState {
-    fn get_sprite_indexes(&self) -> Vec<usize> {
-        // todo: put this fn in another place
-        match self {
-            WarriorPositionState::Idle => vec![0, 1],
-            WarriorPositionState::Walking => vec![0, 1],
-            WarriorPositionState::Jumping => vec![3],
-            WarriorPositionState::Crouching => vec![2],
-            WarriorPositionState::Fallen => vec![4],
-        }
-    }
-}
-
 #[derive(Debug, Component, Clone, Default, Reflect, PartialEq, Eq)]
 #[reflect(Component)]
 pub enum FacingPosition {
@@ -52,34 +40,6 @@ pub enum WarriorKind {
     // Rod,
     // Turi,
     // Fred,
-}
-
-impl WarriorKind {
-    fn increment_sprite_idx(
-        &self,
-        warrior_position_state: &WarriorPositionState,
-        texture_atlas: &mut TextureAtlasSprite,
-    ) {
-        let sprites_idx = warrior_position_state.get_sprite_indexes();
-        let sprites_amount = sprites_idx.len();
-        let min_index = sprites_idx[0];
-        dbg!(&texture_atlas.index);
-
-        if sprites_amount == 1 {
-            texture_atlas.index = min_index;
-            return;
-        }
-
-        let current_atlas_idx = texture_atlas.index;
-        let max_index = sprites_idx[1];
-
-        if current_atlas_idx < min_index || current_atlas_idx > max_index {
-            texture_atlas.index = min_index;
-            return;
-        }
-
-        texture_atlas.index = min_index + (current_atlas_idx + 1) % sprites_amount;
-    }
 }
 
 #[derive(Debug, Component, Reflect, Default)]
@@ -149,7 +109,6 @@ fn update_warriors_sprites(
     mut animated_sprites: Query<
         (
             &mut SpriteAnimationTimer,
-            &WarriorKind,
             &WarriorPositionState,
             &mut TextureAtlasSprite,
             Changed<WarriorPositionState>,
@@ -161,9 +120,8 @@ fn update_warriors_sprites(
     for (
         //
         mut sprite_animation_timer,
-        warrior_kind,
         position_state,
-        mut sprite,
+        mut sprite_atlas,
         changed_position_state,
     ) in &mut animated_sprites
     {
@@ -174,7 +132,7 @@ fn update_warriors_sprites(
         sprite_animation_timer.timer.tick(time.delta());
 
         if changed_position_state || sprite_animation_timer.timer.just_finished() {
-            warrior_kind.increment_sprite_idx(position_state, &mut sprite);
+            sprite_atlas.update_sprite_idx(position_state);
         }
     }
 }

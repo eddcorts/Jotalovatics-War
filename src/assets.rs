@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use bevy_asset_loader::prelude::*;
 
+use crate::warrior::WarriorPositionState;
+
 // tamanho de cada sprite no atlas eh de 250x450
 // pub const WARRIOR_ORIGINAL_SPRITE_SIZE: Vec2 = Vec2::new(141., 453.);
 pub const WARRIOR_SPRITE_TILE_PROPORTION: f32 = 250. / 450.;
@@ -40,12 +42,37 @@ pub struct WarriorAssets {
     ))]
     #[asset(path = "jotaile/jotaile_atlas.png")]
     pub jotaile_sprites: Handle<TextureAtlas>,
-    // pub state_indexes: f32,
 }
 
-// fn load_assets(mut commands: Commands, asset_server: Res<AssetServer>) {
-//     commands.insert_resource(ImageAssets {
-//         jotaile_sprite: asset_server.load("jotaile/idle1.png"),
-//         background_sprite: asset_server.load("scenery/cicest.jpeg"),
-//     });
-// }
+pub trait IncrementSpriteIndex {
+    fn update_sprite_idx(&mut self, warrior_position_state: &WarriorPositionState);
+}
+
+impl IncrementSpriteIndex for TextureAtlasSprite {
+    fn update_sprite_idx(&mut self, warrior_position_state: &WarriorPositionState) {
+        let sprites_idx = match warrior_position_state {
+            WarriorPositionState::Idle | WarriorPositionState::Walking => vec![0, 1],
+            WarriorPositionState::Jumping => vec![3],
+            WarriorPositionState::Crouching => vec![2],
+            WarriorPositionState::Fallen => vec![4],
+        };
+
+        let sprites_amount = sprites_idx.len();
+        let min_index = sprites_idx[0];
+
+        if sprites_amount == 1 {
+            self.index = min_index;
+            return;
+        }
+
+        let current_atlas_idx = self.index;
+        let max_index = sprites_idx[1];
+
+        if current_atlas_idx < min_index || current_atlas_idx > max_index {
+            self.index = min_index;
+            return;
+        }
+
+        self.index = min_index + (current_atlas_idx + 1) % sprites_amount;
+    }
+}
