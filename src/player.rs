@@ -1,9 +1,11 @@
-use crate::warrior::{Speed, WarriorJumpingTimer, WarriorPositionState};
+use crate::warrior::{
+    Speed, WarriorJumpingTimer, WarriorPositionState, WarriorPositionStateTransition,
+};
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 const UP: Vec2 = Vec2::new(0., 1.);
-const JUMP_TIMER_DURATION: f32 = 0.3;
+const JUMP_TIMER_DURATION: f32 = 0.4;
 
 pub struct PlayerPlugin;
 
@@ -26,6 +28,7 @@ fn move_player(
             &mut WarriorPositionState,
             &mut KinematicCharacterController,
             Option<&KinematicCharacterControllerOutput>,
+            &mut WarriorPositionStateTransition,
         ),
         &Player,
     >,
@@ -48,11 +51,14 @@ fn move_player(
         mut warrior_position_state,
         mut kinematic_controller,
         kinematic_output,
+        mut position_state_transition,
     ) = player.single_mut();
+
     let mut to_move = Vec2::ZERO;
 
     if let Some(kinematic_output) = kinematic_output {
         if kinematic_output.grounded {
+            position_state_transition.previous = warrior_position_state.clone();
             *warrior_position_state = WarriorPositionState::Idle;
             commands
                 .get_entity(entity)
@@ -66,6 +72,7 @@ fn move_player(
         WarriorPositionState::Idle | WarriorPositionState::Walking
     ) {
         if keyboard.pressed(KeyCode::W) {
+            position_state_transition.previous = warrior_position_state.clone();
             *warrior_position_state = WarriorPositionState::Jumping;
 
             commands
@@ -77,6 +84,7 @@ fn move_player(
         }
 
         if keyboard.pressed(KeyCode::S) {
+            position_state_transition.previous = warrior_position_state.clone();
             *warrior_position_state = WarriorPositionState::Crouching;
             // todo!("Fazer o estado do jogador pra agachar etc");
         }
@@ -84,12 +92,14 @@ fn move_player(
 
     if keyboard.pressed(KeyCode::A) {
         if *warrior_position_state == WarriorPositionState::Idle {
+            position_state_transition.previous = warrior_position_state.clone();
             *warrior_position_state = WarriorPositionState::Walking;
         }
 
         to_move.x -= player_speed.walk * time.delta_seconds();
     } else if keyboard.pressed(KeyCode::D) {
         if *warrior_position_state == WarriorPositionState::Idle {
+            position_state_transition.previous = warrior_position_state.clone();
             *warrior_position_state = WarriorPositionState::Walking;
         }
         to_move.x += player_speed.walk * time.delta_seconds();
@@ -104,6 +114,7 @@ fn move_player(
         *warrior_position_state == WarriorPositionState::Crouching
             && keyboard.just_released(KeyCode::S)
     ) {
+        position_state_transition.previous = warrior_position_state.clone();
         *warrior_position_state = WarriorPositionState::Idle
     }
 

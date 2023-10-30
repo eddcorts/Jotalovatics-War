@@ -75,7 +75,7 @@ fn spawn_floor(mut commands: Commands) {
                 ..default()
             },
             transform: Transform::from_xyz(0., -HALF_WINDOW_HEIGHT + FLOOR_HEIGHT / 2., 0.1),
-            // visibility: Visibility::Hidden,
+            visibility: Visibility::Hidden,
             ..default()
         },
         Collider::cuboid(WINDOW_WIDTH / 2., FLOOR_HEIGHT / 2.),
