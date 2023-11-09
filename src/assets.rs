@@ -4,19 +4,12 @@ use bevy_asset_loader::prelude::*;
 use crate::warrior::WarriorPositionState;
 
 // tamanho de cada sprite no atlas eh de 250x450
-// pub const WARRIOR_ORIGINAL_SPRITE_SIZE: Vec2 = Vec2::new(141., 453.);
 pub const WARRIOR_SPRITE_TILE_PROPORTION: f32 = 250. / 450.;
 pub const WARRIOR_IN_GAME_HEIGHT: f32 = 260.;
 pub const WARRIOR_IN_GAME_SPRITE_SIZE: Vec2 = Vec2::new(
     WARRIOR_IN_GAME_HEIGHT * WARRIOR_SPRITE_TILE_PROPORTION,
     WARRIOR_IN_GAME_HEIGHT,
 );
-// pub const WARRIOR_NOT_STOOD_UP_SPRIZE_SIZE: Vec2 = Vec2::new(135., 450.);
-
-// pub let ATLAS_SPRITES_INDEX: HashMap<&WarriorPositionState, Vec<usize>> = HashMap::new();
-//     ha
-// //     &WarriorPositionState::Idle: (0,1)
-// };
 
 pub struct AssetsPlugin;
 
