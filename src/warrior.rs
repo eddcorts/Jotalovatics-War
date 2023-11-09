@@ -5,11 +5,12 @@ use crate::{HALF_WINDOW_HEIGHT, WINDOW_WIDTH};
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
+mod hitbox;
 mod sprites;
 mod states;
 mod stats;
 
-pub use self::{sprites::*, states::*, stats::*};
+pub use self::{hitbox::*, sprites::*, states::*, stats::*};
 
 pub struct WarriorPlugin;
 

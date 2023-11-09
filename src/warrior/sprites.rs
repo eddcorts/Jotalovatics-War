@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::assets::IncrementSpriteIndex;
 
-use super::{states::WarriorPositionState, stats::UpdateWarriorHitbox, Warrior};
+use super::{UpdateWarriorHitbox, Warrior, WarriorPositionState};
 
 #[derive(Debug, Component, Reflect, Default)]
 #[reflect(Component)]
