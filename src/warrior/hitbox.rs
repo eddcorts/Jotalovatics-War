@@ -57,6 +57,8 @@ pub fn update_warriors_hitbox(
     >,
 ) {
     // TODO: consider using collision groups and child entities for crouch hitbox
+    //! bugs with walking and crouching, jumping and crouching
+
     for warrior_hitbox_update in update_hitbox_events.iter() {
         let (
             //

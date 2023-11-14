@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::assets::IncrementSpriteIndex;
 
-use super::{UpdateWarriorHitbox, Warrior, WarriorPositionState};
+use super::{DamagedState, UpdateWarriorHitbox, Warrior, WarriorPositionState};
 
 #[derive(Debug, Component, Reflect, Default)]
 #[reflect(Component)]
@@ -16,6 +16,7 @@ pub fn update_warriors_sprites(
             Entity,
             &mut SpriteAnimationTimer,
             &WarriorPositionState,
+            &DamagedState,
             &mut TextureAtlasSprite,
             Changed<WarriorPositionState>,
         ),
@@ -29,6 +30,7 @@ pub fn update_warriors_sprites(
         entity,
         mut sprite_animation_timer,
         position_state,
+        damaged_state,
         mut sprite_atlas,
         changed_position_state,
     ) in &mut animated_sprites
@@ -44,7 +46,7 @@ pub fn update_warriors_sprites(
         sprite_animation_timer.timer.tick(time.delta());
 
         if changed_position_state || sprite_animation_timer.timer.just_finished() {
-            sprite_atlas.update_sprite_idx(position_state);
+            sprite_atlas.update_sprite_idx(position_state, damaged_state);
         }
     }
 }

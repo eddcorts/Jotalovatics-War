@@ -57,7 +57,7 @@ fn move_player(
     let mut to_move = Vec2::ZERO;
 
     if let Some(kinematic_output) = kinematic_output {
-        if kinematic_output.grounded {
+        if *warrior_position_state != WarriorPositionState::Idle && kinematic_output.grounded {
             position_state_transition.previous = warrior_position_state.clone();
             *warrior_position_state = WarriorPositionState::Idle;
             commands
@@ -124,7 +124,7 @@ fn move_player(
 fn process_jump(
     mut player: Query<
         (
-            &mut WarriorJumpingTimer,
+            &WarriorJumpingTimer,
             &mut KinematicCharacterController,
             &Speed,
         ),
@@ -134,13 +134,11 @@ fn process_jump(
 ) {
     for (
         //
-        mut jumping_timer,
+        jumping_timer,
         mut kinematic_controller,
         speed,
     ) in &mut player
     {
-        jumping_timer.timer.tick(time.delta());
-
         let direction = if !jumping_timer.timer.finished() {
             1.
         } else {

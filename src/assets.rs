@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_asset_loader::prelude::*;
 
-use crate::warrior::WarriorPositionState;
+use crate::warrior::{DamagedState, WarriorPositionState};
 
 // tamanho de cada sprite no atlas eh de 250x450
 pub const WARRIOR_SPRITE_TILE_PROPORTION: f32 = 250. / 450.;
@@ -10,6 +10,7 @@ pub const WARRIOR_IN_GAME_SPRITE_SIZE: Vec2 = Vec2::new(
     WARRIOR_IN_GAME_HEIGHT * WARRIOR_SPRITE_TILE_PROPORTION,
     WARRIOR_IN_GAME_HEIGHT,
 );
+pub const ATLAS_COLUMNS_AMOUNT: usize = 6;
 
 pub struct AssetsPlugin;
 
@@ -38,17 +39,33 @@ pub struct WarriorAssets {
 }
 
 pub trait IncrementSpriteIndex {
-    fn update_sprite_idx(&mut self, warrior_position_state: &WarriorPositionState);
+    fn update_sprite_idx(
+        &mut self,
+        warrior_position_state: &WarriorPositionState,
+        damaged_state: &DamagedState,
+    );
 }
 
 impl IncrementSpriteIndex for TextureAtlasSprite {
-    fn update_sprite_idx(&mut self, warrior_position_state: &WarriorPositionState) {
+    fn update_sprite_idx(
+        &mut self,
+        warrior_position_state: &WarriorPositionState,
+        damaged_state: &DamagedState,
+    ) {
+        let column_offset = match damaged_state {
+            DamagedState::None => 0,
+            _ => ATLAS_COLUMNS_AMOUNT,
+        };
+
         let sprites_idx = match warrior_position_state {
             WarriorPositionState::Idle | WarriorPositionState::Walking => vec![0, 1],
             WarriorPositionState::Jumping => vec![3],
             WarriorPositionState::Crouching => vec![2],
             WarriorPositionState::Fallen => vec![4],
-        };
+        }
+        .iter()
+        .map(|idx| idx + column_offset)
+        .collect::<Vec<usize>>();
 
         let sprites_amount = sprites_idx.len();
         let min_index = sprites_idx[0];
