@@ -73,7 +73,7 @@ pub fn attack_hits(
     mut warrior_damaged_state: Query<&mut DamagedState>,
     mut attack_hit_events: EventReader<AttackHit>,
 ) {
-    for attack_hit in attack_hit_events.iter() {
+    for attack_hit in attack_hit_events.read() {
         // TODO: refactor to keep this logic to not happen for _every_ hit, but an aggregated one
         commands
             .entity(attack_hit.warrior_entity)
@@ -93,7 +93,7 @@ pub fn damage_timer_finished(
     mut warrior_state_query: Query<&mut DamagedState>,
 ) {
     //! this dont cover cases like: if damaged in air, then will have to fall to recover character control
-    for damage_timer_finished_event in damage_timer_finished_events.iter() {
+    for damage_timer_finished_event in damage_timer_finished_events.read() {
         *warrior_state_query
             .get_mut(damage_timer_finished_event.0)
             .unwrap() = DamagedState::None;

@@ -6,6 +6,10 @@ use super::{DamagedState, UpdateWarriorHitbox, Warrior, WarriorPositionState};
 
 #[derive(Debug, Component, Reflect, Default)]
 #[reflect(Component)]
+pub struct Sprite;
+
+#[derive(Debug, Component, Reflect, Default)]
+#[reflect(Component)]
 pub struct SpriteAnimationTimer {
     pub timer: Timer,
 }

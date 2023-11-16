@@ -1,6 +1,9 @@
 use bevy::{prelude::*, window::WindowResolution};
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
+// use bevy_inspector_egui_rapier::InspectableRapierPlugin;
 use bevy_rapier2d::prelude::*;
+use bevy_tnua::{control_helpers::TnuaCrouchEnforcerPlugin, prelude::*};
+use bevy_tnua_rapier2d::*;
 
 mod assets;
 mod camera;
@@ -29,7 +32,10 @@ fn main() {
                 })
                 .set(ImagePlugin::default_nearest()),
             WorldInspectorPlugin::default(),
-            RapierPhysicsPlugin::<()>::pixels_per_meter(100.0),
+            RapierPhysicsPlugin::<()>::pixels_per_meter(1000.0),
+            TnuaRapier2dPlugin,
+            TnuaControllerPlugin,
+            TnuaCrouchEnforcerPlugin,
             #[cfg(debug_assertions)]
             RapierDebugRenderPlugin {
                 mode: DebugRenderMode::all(),
@@ -41,6 +47,6 @@ fn main() {
             scenery::SceneryPlugin,
             assets::AssetsPlugin,
         ))
-        // .add_plugins((InspectableRapierPlugin,))
+        // .add_plugins(InspectableRapierPlugin)
         .run();
 }

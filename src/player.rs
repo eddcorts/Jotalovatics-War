@@ -105,6 +105,7 @@ fn move_player(
         to_move.x += player_speed.walk * time.delta_seconds();
     }
 
+    // Return to idle
     if (
         // Stopped walking
         *warrior_position_state == WarriorPositionState::Walking

@@ -11,7 +11,10 @@ impl Plugin for CameraPlugin {
 }
 
 fn spawn_camera(mut commands: Commands) {
-    commands.spawn((Camera2dBundle::default(), RaycastPickCamera::default()));
+    commands.spawn((
+        Camera2dBundle::default(),
+        // RaycastPickCamera::default()
+    ));
 }
 
 fn disable_picking_mod_logs(

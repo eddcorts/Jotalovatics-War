@@ -34,15 +34,15 @@ fn spawn_background(
     scenery_assets: Res<SceneryAssets>,
     assets: Res<Assets<Image>>,
 ) {
-    for event in asset_events.iter() {
+    for event in asset_events.read() {
         match event {
-            AssetEvent::Created { handle } => {
+            AssetEvent::Added { id } => {
                 // a texture was just loaded or changed!
-                if *handle != scenery_assets.cicest_sprite {
+                if *id != scenery_assets.cicest_sprite.id() {
                     continue;
                 }
 
-                let scenery_size = assets.get(handle).unwrap().size();
+                let scenery_size = assets.get(*id).unwrap().size().as_vec2();
                 let scale_proportion = WINDOW_HEIGHT / scenery_size.y;
 
                 commands.spawn((
@@ -59,8 +59,7 @@ fn spawn_background(
                 ));
                 break;
             }
-            AssetEvent::Modified { handle: _ } => {}
-            AssetEvent::Removed { handle: _ } => {}
+            _ => {}
         }
     }
 }

@@ -8,6 +8,14 @@ use super::{
     Warrior,
 };
 
+#[derive(Debug, Component, Reflect, Default)]
+#[reflect(Component)]
+pub struct Hitbox;
+
+#[derive(Debug, Component, Reflect, Default)]
+#[reflect(Component)]
+pub struct CrouchHitbox;
+
 #[derive(Event)]
 pub struct UpdateWarriorHitbox {
     pub warrior_entity: Entity,
@@ -59,7 +67,7 @@ pub fn update_warriors_hitbox(
     // TODO: consider using collision groups and child entities for crouch hitbox
     //! bugs with walking and crouching, jumping and crouching
 
-    for warrior_hitbox_update in update_hitbox_events.iter() {
+    for warrior_hitbox_update in update_hitbox_events.read() {
         let (
             //
             mut warrior_collider,
