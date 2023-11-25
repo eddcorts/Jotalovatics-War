@@ -36,6 +36,7 @@ pub fn tmp_spawn_fixed_attack(mut commands: Commands) {
 pub fn attack_collides_player(
     warriors: Query<(Entity, &KinematicCharacterControllerOutput, Has<Player>), &Warrior>,
     attacks: Query<(Entity, &AttackParty), &Attack>,
+    // query: Query<&Name>,
     mut collision_events: EventWriter<AttackHit>,
 ) {
     let mut ally_attacks: Vec<Entity> = vec![];
@@ -52,6 +53,10 @@ pub fn attack_collides_player(
 
     for (warrior_entity, warrior_kinematic_output, is_ally_warrior) in &warriors {
         for collision in &warrior_kinematic_output.collisions {
+            // query.get(collision.entity).and_then(|x| {
+            //     dbg!(x);
+            //     Ok(x)
+            // });
             if (if is_ally_warrior {
                 &enemy_attacks
             } else {

@@ -16,14 +16,7 @@ pub trait RegisterStateTimerSystems {
 impl RegisterStateTimerSystems for App {
     fn register_state_timer_systems(&mut self) -> &mut Self {
         self.add_event::<StateTimerFinished<DamagedTimer>>()
-            .add_event::<StateTimerFinished<WarriorJumpingTimer>>()
-            .add_systems(
-                Update,
-                (
-                    tick_states_timers::<DamagedTimer>,
-                    tick_states_timers::<WarriorJumpingTimer>,
-                ),
-            )
+            .add_systems(Update, (tick_states_timers::<DamagedTimer>,))
     }
 }
 
@@ -71,18 +64,6 @@ pub enum FacingPosition {
     #[default]
     Right,
     Left,
-}
-
-#[derive(Debug, Component, Reflect, Default)]
-#[reflect(Component)]
-pub struct WarriorJumpingTimer {
-    pub timer: Timer,
-}
-
-impl StateTimer for WarriorJumpingTimer {
-    fn get_timer(&mut self) -> &mut Timer {
-        &mut self.timer
-    }
 }
 
 #[derive(Debug, Component, Reflect, Default)]

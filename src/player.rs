@@ -1,17 +1,19 @@
-use crate::warrior::{
-    Speed, WarriorJumpingTimer, WarriorPositionState, WarriorPositionStateTransition,
-};
+use crate::warrior::{Speed, WarriorPositionState, WarriorPositionStateTransition};
 use bevy::prelude::*;
-use bevy_rapier2d::prelude::*;
-
-const UP: Vec2 = Vec2::new(0., 1.);
-const JUMP_TIMER_DURATION: f32 = 0.4;
+// use bevy_rapier2d::prelude::*;
+use bevy_tnua::prelude::*;
 
 pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, (move_player, process_jump));
+        app.add_systems(
+            Update,
+            (
+                move_player.in_set(TnuaUserControlsSystemSet),
+                // process_jump
+            ),
+        );
     }
 }
 
@@ -20,14 +22,15 @@ impl Plugin for PlayerPlugin {
 pub struct Player;
 
 fn move_player(
-    mut commands: Commands,
+    // mut commands: Commands,
     mut player: Query<
         (
-            Entity,
+            // Entity,
             &Speed,
             &mut WarriorPositionState,
-            &mut KinematicCharacterController,
-            Option<&KinematicCharacterControllerOutput>,
+            // &mut KinematicCharacterController,
+            // Option<&KinematicCharacterControllerOutput>,
+            &mut TnuaController,
             &mut WarriorPositionStateTransition,
         ),
         &Player,
@@ -46,26 +49,27 @@ fn move_player(
 
     let (
         //
-        entity,
+        // entity,
         player_speed,
         mut warrior_position_state,
-        mut kinematic_controller,
-        kinematic_output,
+        mut tnua_controller,
+        // mut kinematic_controller,
+        // kinematic_output,
         mut position_state_transition,
     ) = player.single_mut();
 
-    let mut to_move = Vec2::ZERO;
+    let mut to_move = Vec3::ZERO;
 
-    if let Some(kinematic_output) = kinematic_output {
-        if *warrior_position_state != WarriorPositionState::Idle && kinematic_output.grounded {
-            position_state_transition.previous = warrior_position_state.clone();
-            *warrior_position_state = WarriorPositionState::Idle;
-            commands
-                .get_entity(entity)
-                .unwrap()
-                .remove::<WarriorJumpingTimer>();
-        }
-    }
+    // if let Some(kinematic_output) = kinematic_output {
+    //     if *warrior_position_state != WarriorPositionState::Idle && kinematic_output.grounded {
+    //         position_state_transition.previous = warrior_position_state.clone();
+    //         *warrior_position_state = WarriorPositionState::Idle;
+    //         commands
+    //             .get_entity(entity)
+    //             .unwrap()
+    //             .remove::<WarriorJumpingTimer>();
+    //     }
+    // }
 
     if matches!(
         *warrior_position_state,
@@ -74,13 +78,6 @@ fn move_player(
         if keyboard.pressed(KeyCode::W) {
             position_state_transition.previous = warrior_position_state.clone();
             *warrior_position_state = WarriorPositionState::Jumping;
-
-            commands
-                .get_entity(entity)
-                .unwrap()
-                .insert(WarriorJumpingTimer {
-                    timer: Timer::from_seconds(JUMP_TIMER_DURATION, TimerMode::Once),
-                });
         }
 
         if keyboard.pressed(KeyCode::S) {
@@ -119,36 +116,20 @@ fn move_player(
         *warrior_position_state = WarriorPositionState::Idle
     }
 
-    kinematic_controller.translation = Some(to_move);
-}
-
-fn process_jump(
-    mut player: Query<
-        (
-            &WarriorJumpingTimer,
-            &mut KinematicCharacterController,
-            &Speed,
-        ),
-        &Player,
-    >,
-    time: Res<Time>,
-) {
-    for (
-        //
-        jumping_timer,
-        mut kinematic_controller,
-        speed,
-    ) in &mut player
-    {
-        let direction = if !jumping_timer.timer.finished() {
-            1.
-        } else {
-            -1.
-        };
-
-        let final_speed = kinematic_controller.translation.unwrap_or(Vec2::ZERO)
-            + UP * direction * speed.jump * time.delta_seconds();
-
-        kinematic_controller.translation = Some(final_speed);
+    // kinematic_controller.translation = Some(to_move);
+    if keyboard.pressed(KeyCode::Space) {
+        to_move += Vec3::new(10., 0., 0.) * 40.;
+        tnua_controller.basis(TnuaBuiltinWalk {
+            desired_velocity: to_move,
+            float_height: 200.0,
+            ..default()
+        });
+    }
+    if keyboard.pressed(KeyCode::H) {
+        to_move += Vec3::new(10., 0., 0.) * 40.;
+        tnua_controller.basis(TnuaBuiltinWalk {
+            float_height: 100.0,
+            ..default()
+        });
     }
 }

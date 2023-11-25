@@ -10,7 +10,7 @@ pub struct SceneryPlugin;
 impl Plugin for SceneryPlugin {
     fn build(&self, app: &mut bevy::prelude::App) {
         app.init_collection::<SceneryAssets>()
-            .add_systems(Startup, spawn_floor)
+            .add_systems(Startup, (spawn_floor, apply_gravity))
             .add_systems(
                 Update,
                 spawn_background.run_if(on_event::<AssetEvent<Image>>()),
@@ -77,6 +77,11 @@ fn spawn_floor(mut commands: Commands) {
             visibility: Visibility::Hidden,
             ..default()
         },
-        Collider::cuboid(WINDOW_WIDTH / 2., FLOOR_HEIGHT / 2.),
+        // Collider::cuboid(WINDOW_WIDTH / 2., FLOOR_HEIGHT / 2.),
+        Collider::halfspace(Vec2::Y).unwrap(),
     ));
+}
+
+fn apply_gravity(mut rapier_config: ResMut<RapierConfiguration>) {
+    rapier_config.gravity = Vec2::Y * -9.81;
 }

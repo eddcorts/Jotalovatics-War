@@ -105,14 +105,15 @@ dependencies = [
 
 [[package]]
 name = "ahash"
-version = "0.8.3"
+version = "0.8.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2c99f64d1e06488f620f932677e24bc6e2897582980441ae90a671415bd7ec2f"
+checksum = "91429305e9f0a25f6205c5b8e0d2db09e0708a7a6df0f42212bb56c32c8ac97a"
 dependencies = [
  "cfg-if",
  "getrandom",
  "once_cell",
  "version_check",
+ "zerocopy",
 ]
 
 [[package]]
@@ -2007,7 +2008,7 @@ version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c8e75d4a34ef0b15dffd1ee9079ef1f0f5139527e192b9d5708b3e158777c753"
 dependencies = [
- "ahash 0.8.3",
+ "ahash 0.8.6",
  "bevy_utils_proc_macros",
  "getrandom",
  "hashbrown 0.14.1",
@@ -2656,7 +2657,7 @@ version = "0.20.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "65a5e883a316e53866977450eecfbcac9c48109c2ab3394af29feb83fcde4ea9"
 dependencies = [
- "ahash 0.8.3",
+ "ahash 0.8.6",
  "epaint 0.20.0",
  "nohash-hasher",
 ]
@@ -2667,7 +2668,7 @@ version = "0.23.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8bd69fed5fcf4fbb8225b24e80ea6193b61e17a625db105ef0c4d71dde6eb8b7"
 dependencies = [
- "ahash 0.8.3",
+ "ahash 0.8.6",
  "epaint 0.23.0",
  "nohash-hasher",
 ]
@@ -2777,7 +2778,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "de14b65fe5e423e0058f77a8beb2c863b056d0566d6c4ce0d097aa5814cb705a"
 dependencies = [
  "ab_glyph",
- "ahash 0.8.3",
+ "ahash 0.8.6",
  "atomic_refcell",
  "bytemuck",
  "ecolor 0.20.0",
@@ -2793,7 +2794,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "58067b840d009143934d91d8dcb8ded054d8301d7c11a517ace0a99bb1e1595e"
 dependencies = [
  "ab_glyph",
- "ahash 0.8.3",
+ "ahash 0.8.6",
  "bytemuck",
  "ecolor 0.23.0",
  "emath 0.23.0",
@@ -3292,7 +3293,7 @@ version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7dfda62a12f55daeae5015f81b0baea145391cb4520f86c248fc615d72640d12"
 dependencies = [
- "ahash 0.8.3",
+ "ahash 0.8.6",
  "allocator-api2",
  "serde",
 ]
@@ -5950,3 +5951,23 @@ name = "xml-rs"
 version = "0.8.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0fcb9cbac069e033553e8bb871be2fbdffcab578eb25bd0f7c508cedc6dcd75a"
+
+[[package]]
+name = "zerocopy"
+version = "0.7.26"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e97e415490559a91254a2979b4829267a57d2fcd741a98eee8b722fb57289aa0"
+dependencies = [
+ "zerocopy-derive",
+]
+
+[[package]]
+name = "zerocopy-derive"
+version = "0.7.26"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dd7e48ccf166952882ca8bd778a43502c64f33bf94c12ebe2a7f08e5a0f6689f"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.38",
+]
